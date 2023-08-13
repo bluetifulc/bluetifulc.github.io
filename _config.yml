@@ -20,7 +20,7 @@ timezone: Asia/Seoul
 
 title: VectorCH9 # the main title
 
-tagline: 주로 백엔드에 관한 글을 작성하는 블로그 # it will display as the sub-title
+tagline: 백엔드 개발 블로그 # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   개발에 관련된 글을 작성하는 블로그. 주로 백엔드에 관하여 작성한다.
@@ -29,7 +29,7 @@ description: >- # used by seo meta and the atom feed
 url: "https://vectorch9.github.io"
 
 github:
-  username: bluetifulc # change to your github username
+  username: vectorch9 # change to your github username
 
 twitter:
   username:  # change to your twitter username
