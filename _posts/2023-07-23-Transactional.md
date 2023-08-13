@@ -1,9 +1,9 @@
 ---
-title: Getting Started
-author: cotes
+title: Transactional
+author: vectorch9
 date: 2023-07-23 20:55:00 +09:00
 categories: [Spring, DB]
-tags: [getting started]
+tags: [Transactional, JPA]
 pin: true
 img_path: '/assets/img/posts/transactional/'
 ---
