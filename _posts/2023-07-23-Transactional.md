@@ -1,5 +1,5 @@
 ---
-title: Transactional 내부 동작(AOP를 곁들인)
+title: "@Transactional 내부 동작(AOP를 곁들인)"
 author: vectorch9
 date: 2023-08-15 00:50:00 +09:00
 categories: [Spring, JPA]
