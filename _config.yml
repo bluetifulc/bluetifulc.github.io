@@ -23,7 +23,7 @@ title: VectorCH9 # the main title
 tagline: 백엔드 개발 블로그 # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
-  개발에 관련된 글을 작성하는 블로그. 주로 백엔드에 관하여 작성한다.
+  개발에 관련된 글을 작성하는 블로그로 주로 백엔드에 관하여 작성한다.
 
 # fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
 url: "https://vectorch9.github.io"
@@ -37,7 +37,7 @@ twitter:
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: Dahoon Choi
+  name: vectorch9
   email: bluetifulc@gmail.com # change to your email address
   links:
     # The first element serves as the copyright owner's link
@@ -46,7 +46,7 @@ social:
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
 
-google_site_verification: 66XtfpAJMQ6zcWiDkwqwiZm6D2DcgcuGa0OuthN2tko # fill in to your verification string
+google_site_verification: V-7lDcEywWBJ5slrQa1lqxOQrMW6MbPdqywi7vkwjZE # fill in to your verification string
 
 # ↑ --------------------------
 # The end of `jekyll-seo-tag` settings
