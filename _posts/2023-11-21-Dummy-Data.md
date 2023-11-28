@@ -190,3 +190,72 @@ MariaDB [test]> select id, username, name from user;
 단점으론, 직접 코드로 짜주어야 하기 때문에 꽤 번거롭다. 다만 '더미 데이터 생성'은 일회성 작업이기 때문에 큰 문제는 되지 않는다고 생각한다. 
 
 파이썬을 모르더라도 Js, Ruby, Java를 비롯하여 다양한 생태계의 `Faker` 라이브러리가 존재하므로 필요하다면 찾아보자.
+
+
+## Batch Insert
+위 파이썬 코드의 결과로 나온 쿼리처럼 매 요청마다 `INSERT INTO... VALUES(...);`를 호출하는 것은 다소 비효율적이다. DB는 Batch Insert를 통해 한번에 여러 건의 insert 문을 수행할 수 있다.
+
+```sql
+INSERT INTO ...
+	VALUES(...),
+	VALUES(...)
+	...
+;
+```
+
+Batch Insert는 말 그대로, 하나의 쿼리를 통해 대량의 데이터를 삽입하는 방식이다. 성능이 좋은 이유는 쿼리의 전후로 수행되는 작업 또한 한번만 수행되기 때문이다. 
+
+가장 큰 이유론, DB 서버와의 통신이 단 한번으로 줄어들고 하나의 트랜잭션으로 수행되기 때문이다. 이 외에도 쿼리 파싱, 로깅과 같은 작업이 하나로 함축되므로 성능상 이득이 큰 것이다.
+
+## JdbcTemplate
+위에서 살펴본 `Faker`는 프론트와 연동하는 개발 서버와 같이 실제와 유사한 형태의 데이터가 필요한 경우 활용하기 좋다.
+
+하지만 100만건 이상의 초대량의 데이터가 필요하면 어떨까? `Faker` 라이브러리의 `name`과 같은 칼럼은 최대 750,000건을 지원하므로 라이브러리를 적용하기 어려울 수 있다. 무엇보다 데이터를 입력하는데 매우 긴 시간이 필요하다.
+
+> 100,000건의 데이터를 입력하는데 거의 10초가 걸렸다 가정하면(실제론 10초보다 더 걸렸다.) 천만건의 데이터를 입력하려면 1,000초(=16분)씩이나 필요하다.
+
+개발 중인 프로젝트에선 DB 쿼리 성능 테스트를 위해 테이블 당 100~1000만건의 데이터를 집어넣기로 했다. 테스트 환경에선 값이 랜덤하더라도 크게 상관없다고 판단했다.
+
+> 물론 상황에 따라 다른 이야기다. 성능 테스트시에 실제와 비슷한 데이터가 필요할 수도 있다. 또한, 랜덤 값이더라도 데이터 자체의 특성은 실제 서비스와 비슷해야한다.
+
+따라서 JdbcTemplate의 batch insert를 활용하여 DB에 데이터를 삽입하기로 했다. 아래는 각 배치에 10,000건의 데이터를 100번 삽입하는 메서드다. (즉 100만건의 데이터를 추가한다.)
+
+```java
+public void saveUser() {  
+    id = 1;
+    sql = "INSERT INTO `user` (id, name, username, email) VALUES (?, ?, ?, ?);";  
+    for (int index = 1; index <= 100; ++index) {  
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {  
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {  
+                ps.setLong(1, id);  
+                ps.setString(2, random.createRandomString(15));  
+                ps.setString(3, random.createRandomString(15));  
+                ps.setString(4, random.createRandomString(10) + "@email.com");
+                id += 1;  
+            }  
+  
+            @Override  
+            public int getBatchSize() {  
+                return 10000;  
+            }
+		}); 
+	}
+}
+```
+
+100만건의 데이터를 추가하는데 약 10초 정도의 시간으로 위에서 소개한 방법에 비해 월등히 빠른 속도를 보여주었다.
+
+> 코드가 다소 더럽지만 이해하기 쉽도록 위처럼 작성하였다.
+
+### 장단점
+설명하였듯이, 속도가 압도적으로 빠르다. 장점은 이 하나만으로 충분하며 대량의 데이터를 추가해야 하는 경우 사용하기에 좋다.
+
+단점으론 랜덤한 값에 의존하기에 실제와 같은 값을 구성하긴 어렵다. 속도와 현실감이 트레이드 오프 관계를 가진다고 생각하면 된다. 
+
+## 마치며
+상황에 따라 `Faker`와 `JdbcTemplate`, 글에서 잠깐 소개한 `Mockaroo`를 사용할 것 같다.
+
+- 1,000건 이하의 데이터가 필요하며 현실감이 있어야 하는 경우, 쉽게 구성하고 싶은 경우: Mockaroo
+- 1,000~100,000건 정도의 데이터가 필요하며 현실감이 있어야 하는 경우: Faker
+- 100,000건 이상이 필요하며 랜덤한 값이어도 상관 없는 경우: JdbcTemplate
